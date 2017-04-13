@@ -4,15 +4,15 @@ $(function() {
 	var player = $('#player');
 	player.speed = 5;
 
-	player.css('height', $('#player-icon').css('height'));
-	player.css('width', $('#player-icon').css('width'));
+	player.css('height', '179px');
+	player.css('width', '96px');
 	$('main').css('height', $('#background').css('height'));
 	$('main').css('width', $('#background').css('width'));
 
 
 	function nextScreen() {
 		if (images.length) {
-			$('#background').attr('src', ('img/' + images.shift() + '.png'));
+			$('#background').attr('src', ('img/' + images.shift() + '.PNG'));
 			
 			$('main').css('height', $('#background').css('height'));
 			$('main').css('width', $('#background').css('width'));
