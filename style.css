@@ -10,3 +10,26 @@ main {
 	bottom: 0px;
 	left: 0px;
 }
+#person {
+	position: absolute;
+	bottom: 0px;
+	right: 50px;
+}
+#question-box {
+	position: absolute;
+	top: 0px;
+}
+.hidden {
+	display: none;
+}
+.show {
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%, 20%);
+	background-color: #dedede;
+	border: 3px solid gray;
+	border-radius: 10%;
+}
+#question {
+	text-align: center;
+}
