@@ -30,6 +30,9 @@ main {
 	border: 3px solid gray;
 	border-radius: 10%;
 }
+.invisible {
+	visibility: hidden;
+}
 #question {
 	text-align: center;
 }
