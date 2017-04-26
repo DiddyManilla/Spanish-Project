@@ -1,5 +1,6 @@
+/*global $*/
 $(function() {
-	var images = ['Partido'];
+	var images = ['Casa', 'Partido'];
 	var keys = {left: false, right: false};
 	var questions = [{
 		'text': 'Buenos dias! Adonde vas?',
@@ -9,30 +10,69 @@ $(function() {
 					 'Buenos dias! Yo vamos al Partido.']
 	},
 	{
-		'text': 'Hola! Como estas?',
-		'answers': [
-
-					]
+		'text': 'Hola! Que te gusta hacer?',
+		'answers': ['Me gusta juego futbol. Adios!',
+					'Me gusta jugar futbol. Adios!',
+					'Te gusta juego futbol. Adios!',
+					'Te gusta jugar futbol. Adios!']
 	}];
 	var player = $('#player');
 	player.speed = 5;
 	
 	player.score = 0;
 	player.maxScore = 2;
-
-	player.css('height', '179px');
-	player.css('width', '96px');
-	$('main').css('height', $('#background').css('height'));
-	$('main').css('width', $('#background').css('width'));
+	
+	var questioning = false;
+	var loaded = {player: false, person: false, background: false};
+	
+	//Load player icon
+	$('<img id="player-icon" src="img/grey_square.png"/>').on('load', function() {
+		$(this).appendTo('#player');
+		player.css('height', $('#player-icon').css('height'));
+		player.css('width', $('#player-icon').css('width'));
+		
+		loaded.player = true;
+		if (loaded.player && loaded.person && loaded.background) {
+			$('main').removeClass('invisible');
+		}
+	});
+	
+	//Load NPC icon
+	$('<img id="person-icon" src="img/blue_square.png"/>').on('load', function() {
+		$(this).appendTo('#person');
+		$('person').css('height', $('#player-icon').css('height'));
+		$('person').css('width', $('#player-icon').css('width'));
+		
+		loaded.person = true;
+		if (loaded.player && loaded.person && loaded.background) {
+			$('main').removeClass('invisible');
+		}
+	});
+	
+	//Load background image
+	$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
+		$(this).appendTo('main');
+		$('main').css('height', $('#background').css('height'));
+		$('main').css('width', $('#background').css('width'));
+		
+		loaded.background = true;
+		if (loaded.player && loaded.person && loaded.background) {
+			$('main').removeClass('invisible');
+		}
+	});
 
 
 	function nextScreen() {
 		if (images.length) {
-			$('#background').attr('src', ('img/' + images.shift() + '.PNG'));
+
 			
-			$('main').css('height', $('#background').css('height'));
-			$('main').css('width', $('#background').css('width'));
-			console.log($('#background').css('height'));
+			$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
+				$('#background').remove();
+				$(this).appendTo('main');
+				$('main').css('height', $('#background').css('height'));
+				$('main').css('width', $('#background').css('width'));
+				console.log($('#background').css('height'));
+			});
 		}
 	}
 
@@ -41,21 +81,27 @@ $(function() {
 		player.timeout = setTimeout(arguments.callee, player.speed);
 	}
 	function moveRight() {
-		player.css('left', player.position().left + 1 + 'px');
-		player.timeout = setTimeout(arguments.callee, player.speed);
-
 		if (player.position().left + player.width() >= $('#background').width()) {
 			nextScreen();
 			player.css('left', '0px');
+			player.timeout = setTimeout(arguments.callee, player.speed);
 		} else if (player.position().left + player.width() >= $('#person').position().left - 50) {
 			clearTimeout(player.timeout);
-			question();
+			if (!questioning) {
+				question();
+				questioning = true;
+				$('body').off('keydown');
+			}
+		} else {
+			player.css('left', player.position().left + 1 + 'px');
+			player.timeout = setTimeout(arguments.callee, player.speed);
 		}
 	}
 
 	function answer() {
 
 	}
+	
 	function question() {
 		if (questions.length) {
 			var question = questions.shift();
@@ -65,7 +111,7 @@ $(function() {
 			});
 
 			$('#answers li').on('click', function(event) {
-				answer()
+				answer();
 			});
 
 			$('#question-box').removeClass('hidden');
