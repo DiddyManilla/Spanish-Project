@@ -117,7 +117,7 @@ $(function() {
 
 	function moveLeft() {
 		if (!(player.position().left + player.width() >= $('#person').position().left - 50 && !answered)
-				&& $('#loading').hasClass('invisible')) {
+				&& $('#loading').hasClass('invisible') && player.position().left > 0) {
 			player.css('left', player.position().left - 1 + 'px');
 			player.timeout = setTimeout(arguments.callee, player.speed);
 		}
