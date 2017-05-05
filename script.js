@@ -1,21 +1,47 @@
 /*global $*/
 $(function() {
 	var images = ['Casa', 'Partido'];
-	var keys = {left: false, right: false};
-	var questions = [{
+	var keys = {left: false, right: false, space: false};
+	//Each conversation is an array of questions, each with text, answers, and correctAnswer.
+	var conversations = [
+		[
+				{
+					'text': 'Buenos dias! Como estas?',
+					'answers' : ['Yo estoy bueno. Y tu?',
+						 'Yo estas bien. Y tu?',
+						 'Yo esto bueno. Y tu?',
+						 'Yo estoy bien. Y tu?'],
+					'correctAnswer': 3
+				},
+				{
+					'text': 'Adonde vas?',
+					'answers' : [
+						'Yo voy al Partido. Adios!',
+						'Yo voy a la Partido. Adios!',
+						'Yo vas a el Partido. Adios!',
+						'Yo vamos al Partido. Adios!'],
+					'correctAnswer': 0
+				}
+			
+		]
+	];
+	var conversation = conversations.shift();
+	/*var questions = [{
 		'text': 'Buenos dias! Adonde vas?',
 		'answers' : ['Buenos dias! Yo voy al Partido.',
 					 'Buenos dias! Yo voy a la Partido',
 					 'Buenos dias! Yo vas a el Partido.',
-					 'Buenos dias! Yo vamos al Partido.']
+					 'Buenos dias! Yo vamos al Partido.'],
+		'correctAnswer': 0
 	},
 	{
 		'text': 'Hola! Que te gusta hacer?',
 		'answers': ['Me gusta juego futbol. Adios!',
 					'Me gusta jugar futbol. Adios!',
 					'Te gusta juego futbol. Adios!',
-					'Te gusta jugar futbol. Adios!']
-	}];
+					'Te gusta jugar futbol. Adios!'],
+		'correctAnswer': 1
+	}];*/
 	var player = $('#player');
 	player.speed = 5;
 	
@@ -23,6 +49,7 @@ $(function() {
 	player.maxScore = 2;
 	
 	var questioning = false;
+	var answered = false;
 	var loaded = {player: false, person: false, background: false};
 	
 	//Load player icon
@@ -65,7 +92,7 @@ $(function() {
 	function nextScreen() {
 		if (images.length) {
 
-			
+			conversation = conversations.shift();
 			$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
 				$('#background').remove();
 				$(this).appendTo('main');
@@ -77,46 +104,88 @@ $(function() {
 	}
 
 	function moveLeft() {
-		player.css('left', player.position().left - 1 + 'px');
-		player.timeout = setTimeout(arguments.callee, player.speed);
+		if (!(player.position().left + player.width() >= $('#person').position().left - 50 && !answered)) {
+			player.css('left', player.position().left - 1 + 'px');
+			player.timeout = setTimeout(arguments.callee, player.speed);
+		}
 	}
+	
 	function moveRight() {
 		if (player.position().left + player.width() >= $('#background').width()) {
+			console.log('Next screen');
 			nextScreen();
 			player.css('left', '0px');
-			player.timeout = setTimeout(arguments.callee, player.speed);
-		} else if (player.position().left + player.width() >= $('#person').position().left - 50) {
-			clearTimeout(player.timeout);
+		} else if (player.position().left + player.width() >= $('#person').position().left - 50 && !answered) {
+			console.log('Player is past NPC.');
 			if (!questioning) {
 				question();
 				questioning = true;
-				$('body').off('keydown');
 			}
 		} else {
+			console.log('Player is moving');
 			player.css('left', player.position().left + 1 + 'px');
-			player.timeout = setTimeout(arguments.callee, player.speed);
 		}
-	}
-
-	function answer() {
-
+		player.timeout = setTimeout(arguments.callee, player.speed);
 	}
 	
+	
+	
 	function question() {
-		if (questions.length) {
-			var question = questions.shift();
+		console.log(conversation.length);
+		var questionFunction = arguments.callee;
+		
+		if (conversation.length) {
+			var question = conversation.shift();
 			$('#question').text(question.text);
-			$('#answers li').each(function(i) {
+			var answers = $('#answers li');
+			
+			answers.each(function(i) {
 				$(this).text(question.answers[i]);
+				$(this).css('background-color', '#dedede');
+				$(this).on('mouseover', function() {
+					$(this).css('background-color', '#bebebe');
+				}).on('mouseout', function() {
+					$(this).css('background-color', '#dedede');
+				});
 			});
-
-			$('#answers li').on('click', function(event) {
-				answer();
+			
+			answers.on('click', function(event) {
+				
+				var correct = $(this).text() == question.answers[question.correctAnswer];
+				
+				if (correct) {
+					player.score++;
+				} else {
+					$(this).css('background-color', '#ff6060');
+				}
+				
+				$(answers[question.correctAnswer]).css('background-color', '#35f24e');
+				$('#continue').removeClass('invisible');
+				
+				answers.off('click');
+				$('body').on('spacebar', function() {
+					console.log('spacebar');
+					$('#continue').addClass('invisible');
+					$('body').off('spacebar');
+					if (conversation.length) {
+						questionFunction();
+					} else {
+						$('#question-box').addClass('hidden');
+						$('#question-box').removeClass('show');
+						questioning = false;
+						answered = true;
+					}
+					
+					
+				});
+				answers.off('mouseover').off('mouseout');
+				
 			});
-
+			
 			$('#question-box').removeClass('hidden');
 			$('#question-box').addClass('show');
 		}
+		
 	}
 
 	$('body').on('keydown', function(event) {
@@ -127,6 +196,10 @@ $(function() {
 		} else if (event.keyCode == 39 && !keys.right) {
 			keys.right = true;
 			moveRight();
+		} else if (event.keyCode == 32 && !keys.space) {
+			keys.space = true;
+			console.log('spacebar');
+			$('body').trigger('spacebar');
 		}
 	})
 
@@ -137,9 +210,11 @@ $(function() {
 			keys.left = false;
 			clearTimeout(player.timeout);
 		} else if (event.keyCode == 39) {
-
+			
 			keys.right = false;
 			clearTimeout(player.timeout);
+		} else if (event.keyCode == 32) {
+			keys.space = false;
 		}
 	});
 
