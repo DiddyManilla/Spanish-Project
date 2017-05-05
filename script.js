@@ -81,6 +81,8 @@ $(function() {
 		$(this).appendTo('main');
 		$('main').css('height', $('#background').css('height'));
 		$('main').css('width', $('#background').css('width'));
+		$('#loading').css('height', $('main').css('height'));
+		$('#loading').css('width', $('main').css('width'));
 		
 		loaded.background = true;
 		if (loaded.player && loaded.person && loaded.background) {
@@ -93,18 +95,29 @@ $(function() {
 		if (images.length) {
 
 			conversation = conversations.shift();
+			$('#loading').removeClass('invisible');
+			
+			setTimeout(function() {
 			$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
 				$('#background').remove();
+				
+				$('#loading').addClass('invisible');
+				
 				$(this).appendTo('main');
 				$('main').css('height', $('#background').css('height'));
 				$('main').css('width', $('#background').css('width'));
+				
+				$('#loading').css('height', $('main').css('height'));
+				$('#loading').css('width', $('main').css('width'));
 				console.log($('#background').css('height'));
 			});
+			}, 5000);
 		}
 	}
 
 	function moveLeft() {
-		if (!(player.position().left + player.width() >= $('#person').position().left - 50 && !answered)) {
+		if (!(player.position().left + player.width() >= $('#person').position().left - 50 && !answered)
+				&& $('#loading').hasClass('invisible')) {
 			player.css('left', player.position().left - 1 + 'px');
 			player.timeout = setTimeout(arguments.callee, player.speed);
 		}
@@ -121,7 +134,7 @@ $(function() {
 				question();
 				questioning = true;
 			}
-		} else {
+		} else if ($('#loading').hasClass('invisible')) {
 			console.log('Player is moving');
 			player.css('left', player.position().left + 1 + 'px');
 		}
@@ -164,7 +177,6 @@ $(function() {
 				
 				answers.off('click');
 				$('body').on('spacebar', function() {
-					console.log('spacebar');
 					$('#continue').addClass('invisible');
 					$('body').off('spacebar');
 					if (conversation.length) {
@@ -198,7 +210,6 @@ $(function() {
 			moveRight();
 		} else if (event.keyCode == 32 && !keys.space) {
 			keys.space = true;
-			console.log('spacebar');
 			$('body').trigger('spacebar');
 		}
 	})
