@@ -97,7 +97,6 @@ $(function() {
 			conversation = conversations.shift();
 			$('#loading').removeClass('invisible');
 			
-			setTimeout(function() {
 			$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
 				$('#background').remove();
 				
@@ -111,7 +110,6 @@ $(function() {
 				$('#loading').css('width', $('main').css('width'));
 				console.log($('#background').css('height'));
 			});
-			}, 5000);
 		}
 	}
 
