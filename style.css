@@ -8,7 +8,7 @@ main {
 #player {
 	position: absolute;
 	bottom: 0px;
-	left: 0px;
+	left: 50px;
 }
 #person {
 	position: absolute;
@@ -22,7 +22,7 @@ main {
 .hidden {
 	display: none;
 }
-.show {
+#question-box.show {
 	position: absolute;
 	left: 50%;
 	transform: translate(-50%, 20%);
@@ -54,14 +54,33 @@ main {
 	position: absolute;
 	top: 0;
 	left: 0;
-	background: rgba(200, 200, 200, 0.5);
+	background: rgba(150, 150, 150, 0.5);
 }
 
-#loading p {
+#loading p, #results p {
 	position: absolute;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -100%);
 	text-align: center;
 	font-size: 2em;
+	padding: 0px 5px 0px 5px;
+	background-color: #dedede;
+	border: 3px solid #646a60;
+	border-radius: 10%;
+}
+#results {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #c8c8c8;
+}
+.unselectable {
+	-webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                          supported by Chrome and Opera */
 }

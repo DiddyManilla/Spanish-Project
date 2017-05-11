@@ -1,53 +1,118 @@
 /*global $*/
 $(function() {
-	var images = ['Casa', 'Partido'];
+	var images = ['Casa', 'Partido', 'Concierto'];
 	var keys = {left: false, right: false, space: false};
 	//Each conversation is an array of questions, each with text, answers, and correctAnswer.
 	var conversations = [
 		[
-				{
-					'text': 'Buenos dias! Como estas?',
-					'answers' : ['Yo estoy bueno. Y tu?',
-						 'Yo estas bien. Y tu?',
-						 'Yo esto bueno. Y tu?',
-						 'Yo estoy bien. Y tu?'],
-					'correctAnswer': 3
-				},
-				{
-					'text': 'Adonde vas?',
-					'answers' : [
-						'Yo voy al Partido. Adios!',
-						'Yo voy a la Partido. Adios!',
-						'Yo vas a el Partido. Adios!',
-						'Yo vamos al Partido. Adios!'],
-					'correctAnswer': 0
-				}
-			
+			{
+				'text': 'Buenos dias! Como estas?',
+				'answers' : ['Yo estoy bueno. Y tu?',
+					 'Yo estas bien. Y tu?',
+					 'Yo esto bueno. Y tu?',
+					 'Yo estoy bien. Y tu?'],
+				'correctAnswer': 3
+			},
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			},
+			{
+				'text': 'Adonde vas?',
+				'answers' : [
+					'Yo voy al Partido. Adios!',
+					'Yo voy a la Partido. Adios!',
+					'Yo vas a el Partido. Adios!',
+					'Yo vamos al Partido. Adios!'],
+				'correctAnswer': 0
+			}
+		],
+		
+		[
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			},
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			},
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			}
+		],
+		
+		[
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			},
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			},
+			{
+				'text': '',
+				'answers' : [
+					'1',
+					'2',
+					'3',
+					'4'],
+				'correctAnswer': 0
+			}
 		]
 	];
 	var conversation = conversations.shift();
-	/*var questions = [{
-		'text': 'Buenos dias! Adonde vas?',
-		'answers' : ['Buenos dias! Yo voy al Partido.',
-					 'Buenos dias! Yo voy a la Partido',
-					 'Buenos dias! Yo vas a el Partido.',
-					 'Buenos dias! Yo vamos al Partido.'],
-		'correctAnswer': 0
-	},
-	{
-		'text': 'Hola! Que te gusta hacer?',
-		'answers': ['Me gusta juego futbol. Adios!',
-					'Me gusta jugar futbol. Adios!',
-					'Te gusta juego futbol. Adios!',
-					'Te gusta jugar futbol. Adios!'],
-		'correctAnswer': 1
-	}];*/
 	var player = $('#player');
 	player.speed = 5;
 	
 	player.score = 0;
-	player.maxScore = 2;
+	var numQuestions = 0;
 	
+	var keyDownHandler = function(event) {
+
+		if (event.keyCode == 37 && !keys.left) {
+			keys.left = true;
+			moveLeft();
+		} else if (event.keyCode == 39 && !keys.right) {
+			keys.right = true;
+			moveRight();
+		} else if (event.keyCode == 32 && !keys.space) {
+			keys.space = true;
+			$('body').trigger('spacebar');
+		}
+	};
 	var questioning = false;
 	var answered = false;
 	var loaded = {player: false, person: false, background: false};
@@ -60,6 +125,7 @@ $(function() {
 		
 		loaded.player = true;
 		if (loaded.player && loaded.person && loaded.background) {
+			$('body').on('keydown', keyDownHandler);
 			$('main').removeClass('invisible');
 		}
 	});
@@ -72,6 +138,7 @@ $(function() {
 		
 		loaded.person = true;
 		if (loaded.player && loaded.person && loaded.background) {
+			$('body').on('keydown', keyDownHandler);
 			$('main').removeClass('invisible');
 		}
 	});
@@ -86,14 +153,19 @@ $(function() {
 		
 		loaded.background = true;
 		if (loaded.player && loaded.person && loaded.background) {
+			$('body').on('keydown', keyDownHandler);
 			$('main').removeClass('invisible');
 		}
 	});
 
-
+	function end() {
+		$('#score').text(`You scored ${player.score} out of a possible ${numQuestions} points!`);
+		$('#results').css('height', $('main').css('height'));
+		$('#results').css('width', $('main').css('width'));
+		$('#results').removeClass('invisible');
+	}
 	function nextScreen() {
 		if (images.length) {
-
 			conversation = conversations.shift();
 			$('#loading').removeClass('invisible');
 			
@@ -108,8 +180,10 @@ $(function() {
 				
 				$('#loading').css('height', $('main').css('height'));
 				$('#loading').css('width', $('main').css('width'));
-				console.log($('#background').css('height'));
+				answered = false;
 			});
+		} else {
+			end();
 		}
 	}
 
@@ -123,17 +197,14 @@ $(function() {
 	
 	function moveRight() {
 		if (player.position().left + player.width() >= $('#background').width()) {
-			console.log('Next screen');
 			nextScreen();
 			player.css('left', '0px');
 		} else if (player.position().left + player.width() >= $('#person').position().left - 50 && !answered) {
-			console.log('Player is past NPC.');
 			if (!questioning) {
 				question();
 				questioning = true;
 			}
 		} else if ($('#loading').hasClass('invisible')) {
-			console.log('Player is moving');
 			player.css('left', player.position().left + 1 + 'px');
 		}
 		player.timeout = setTimeout(arguments.callee, player.speed);
@@ -142,7 +213,6 @@ $(function() {
 	
 	
 	function question() {
-		console.log(conversation.length);
 		var questionFunction = arguments.callee;
 		
 		if (conversation.length) {
@@ -163,7 +233,7 @@ $(function() {
 			answers.on('click', function(event) {
 				
 				var correct = $(this).text() == question.answers[question.correctAnswer];
-				
+				numQuestions++;
 				if (correct) {
 					player.score++;
 				} else {
@@ -198,22 +268,7 @@ $(function() {
 		
 	}
 
-	$('body').on('keydown', function(event) {
-
-		if (event.keyCode == 37 && !keys.left) {
-			keys.left = true;
-			moveLeft();
-		} else if (event.keyCode == 39 && !keys.right) {
-			keys.right = true;
-			moveRight();
-		} else if (event.keyCode == 32 && !keys.space) {
-			keys.space = true;
-			$('body').trigger('spacebar');
-		}
-	})
-
-
-	.on('keyup', function(event) {
+	$('body').on('keyup', function(event) {
 
 		if (event.keyCode == 37) {
 			keys.left = false;
