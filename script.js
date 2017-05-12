@@ -1,26 +1,29 @@
 /*global $*/
+var player;
 $(function() {
 	var images = ['Casa', 'Partido', 'Concierto'];
 	var keys = {left: false, right: false, space: false};
 	//Each conversation is an array of questions, each with text, answers, and correctAnswer.
+	var NPCs = ['Mom', 'Soccer_Player', 'Concert_Goer'];
 	var conversations = [
+		//Screen 1, Home
 		[
 			{
-				'text': 'Buenos dias! Como estas?',
-				'answers' : ['Yo estoy bueno. Y tu?',
-					 'Yo estas bien. Y tu?',
-					 'Yo esto bueno. Y tu?',
-					 'Yo estoy bien. Y tu?'],
+				'text': 'Buenos dias, hijo! Como estas?',
+				'answers' : ['Yo estoy bueno. Y tu, Mama?',
+					 'Yo estas bien. Y tu, Mama?',
+					 'Yo esto bueno. Y tu, Mama?',
+					 'Yo estoy bien. Y tu, Mama?'],
 				'correctAnswer': 3
 			},
 			{
-				'text': '',
+				'text': 'Yo estoy bien. Que te gusta hacer?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'Me gusto veo deportes.',
+					'Te gusta ver deportes.',
+					'Me gusta ver deportes.',
+					'Te gusto veo deportes.'],
+				'correctAnswer': 2
 			},
 			{
 				'text': 'Adonde vas?',
@@ -33,68 +36,70 @@ $(function() {
 			}
 		],
 		
+		//Screen 2, Soccer game
 		[
 			{
-				'text': '',
+				'text': `Hola! Como te llamas?`,
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'Te llamas Julio. Y usted?',
+					'Te llamo Julio. Y usted?',
+					'Me llama Julio. Y usted?',
+					'Me llamo Julio. Y usted?'],
+				'correctAnswer': 3
 			},
 			{
-				'text': '',
+				'text': 'Me llamo Givanildo. Cuantas personas hay aqui para ver el partido?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'Hay mucho personas aqui.',
+					'Hay muchas personas aqui.',
+					'Hay muchos personos aqui.',
+					'Hay mucha personas aqui.'],
+				'correctAnswer': 1
 			},
 			{
-				'text': '',
+				'text': 'Cual juego juegan ellos?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
+					'Ellos juegan futbol. Hasta luego!',
+					`Ellos escalan una montana. Hasta luego!`,
+					`Ellos nadan en el oceano. Hasta luego!`,
+					'Ellos juegan baloncesto. Ciao!'],
 				'correctAnswer': 0
 			}
 		],
 		
+		//Screen 3, Concert
 		[
 			{
-				'text': '',
+				'text': 'Hola! Donde estamos?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'Somos en un cine.',
+					'Estamos en un concierto.',
+					'Estamos en un cafe.',
+					'Somos en un restaurante.'],
+				'correctAnswer': 1
 			},
 			{
-				'text': '',
+				'text': 'De que tipo es este concierto?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'Es un opera.',
+					'Es un orquesta.',
+					'Es un concierto de rock.',
+					'Es un concierto coral.'],
+				'correctAnswer': 2
 			},
 			{
-				'text': '',
+				'text': 'Que instrumento toca el?',
 				'answers' : [
-					'1',
-					'2',
-					'3',
-					'4'],
-				'correctAnswer': 0
+					'El toca un guitarra.',
+					'El toca un violin.',
+					'El toca un piano.',
+					'El toca una guitarra.'],
+				'correctAnswer': 3
 			}
 		]
 	];
 	var conversation = conversations.shift();
-	var player = $('#player');
+	player = $('#player');
 	player.speed = 5;
 	
 	player.score = 0;
@@ -118,7 +123,7 @@ $(function() {
 	var loaded = {player: false, person: false, background: false};
 	
 	//Load player icon
-	$('<img id="player-icon" src="img/grey_square.png"/>').on('load', function() {
+	$('<img id="player-icon" src="img/Julio.png"/>').on('load', function() {
 		$(this).appendTo('#player');
 		player.css('height', $('#player-icon').css('height'));
 		player.css('width', $('#player-icon').css('width'));
@@ -131,7 +136,7 @@ $(function() {
 	});
 	
 	//Load NPC icon
-	$('<img id="person-icon" src="img/blue_square.png"/>').on('load', function() {
+	$('<img id="person-icon" src="img/' + NPCs.shift() + '.png"/>').on('load', function() {
 		$(this).appendTo('#person');
 		$('person').css('height', $('#player-icon').css('height'));
 		$('person').css('width', $('#player-icon').css('width'));
@@ -159,28 +164,59 @@ $(function() {
 	});
 
 	function end() {
-		$('#score').text(`You scored ${player.score} out of a possible ${numQuestions} points!`);
+		$('#score').text(`You scored ${player.score} out of a possible ${numQuestions} points!
+		${player.score > numQuestions?'That shouldn\'t have happened...':player.score == numQuestions?'A perfect score!':'Good job!'}`);
 		$('#results').css('height', $('main').css('height'));
 		$('#results').css('width', $('main').css('width'));
 		$('#results').removeClass('invisible');
 	}
+	
 	function nextScreen() {
 		if (images.length) {
 			conversation = conversations.shift();
 			$('#loading').removeClass('invisible');
+			loaded.background = false;
+			loaded.person = false;
+			var background = $('<img id="background" src="img/'+ images.shift() +'.png">');
+			var npc = $('<img src="img/' + NPCs.shift() + '.png">');
+			npc.on('load', function() {
+				loaded.person = true;
+				if (loaded.person && loaded.background) {
+					$('#person').empty();
+					npc.appendTo('#person');
+					
+					$('#background').remove();
+					
+					$('#loading').addClass('invisible');
+					
+					background.appendTo('main');
+					$('main').css('height', $('#background').css('height'));
+					$('main').css('width', $('#background').css('width'));
+					
+					$('#loading').css('height', $('main').css('height'));
+					$('#loading').css('width', $('main').css('width'));
+					answered = false;
+				}
+			});
 			
-			$('<img id="background" src="img/'+ images.shift() +'.png">').on('load', function() {
-				$('#background').remove();
-				
-				$('#loading').addClass('invisible');
-				
-				$(this).appendTo('main');
-				$('main').css('height', $('#background').css('height'));
-				$('main').css('width', $('#background').css('width'));
-				
-				$('#loading').css('height', $('main').css('height'));
-				$('#loading').css('width', $('main').css('width'));
-				answered = false;
+			background.on('load', function() {
+				loaded.background = true;
+				if (loaded.person && loaded.background) {
+					$('#person').empty();
+					npc.appendTo('#person');
+					
+					$('#background').remove();
+					
+					$('#loading').addClass('invisible');
+					
+					background.appendTo('main');
+					$('main').css('height', $('#background').css('height'));
+					$('main').css('width', $('#background').css('width'));
+					
+					$('#loading').css('height', $('main').css('height'));
+					$('#loading').css('width', $('main').css('width'));
+					answered = false;
+				}
 			});
 		} else {
 			end();
@@ -198,7 +234,7 @@ $(function() {
 	function moveRight() {
 		if (player.position().left + player.width() >= $('#background').width()) {
 			nextScreen();
-			player.css('left', '0px');
+			player.css('left', '50px');
 		} else if (player.position().left + player.width() >= $('#person').position().left - 50 && !answered) {
 			if (!questioning) {
 				question();
